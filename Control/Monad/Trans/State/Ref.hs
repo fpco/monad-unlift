@@ -4,6 +4,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DeriveFunctor #-}
+-- | An implementation of @StateT@ built on top of mutable references,
+-- providing a proper monad morphism.
 module Control.Monad.Trans.State.Ref
     ( StateRefT
     , runStateRefT
@@ -23,11 +25,17 @@ import Control.Applicative
 import Data.Mutable
 import Control.Monad.Catch
 
+-- |
+--
+-- Since 0.1.0
 newtype StateRefT ref s m a = StateRefT
     { unStateRefT :: ref s -> m a
     }
     deriving Functor
 
+-- |
+--
+-- Since 0.1.0
 runStateRefT
     :: ( Monad m
        , s ~ RefElement (ref s)
@@ -44,7 +52,11 @@ runStateRefT (StateRefT f) v0 = do
     a <- f ref
     v <- liftBase $ readRef ref
     return (a, v)
+{-# INLINEABLE runStateRefT #-}
 
+-- |
+--
+-- Since 0.1.0
 runStateIORefT
     :: ( Monad m
        , RealWorld ~ PrimState b
@@ -57,6 +69,9 @@ runStateIORefT
 runStateIORefT = runStateRefT
 {-# INLINE runStateIORefT #-}
 
+-- |
+--
+-- Since 0.1.0
 runStateSTRefT
     :: ( Monad m
        , ps ~ PrimState b
