@@ -12,6 +12,9 @@ module Control.Monad.Trans.Morphism
     , MonadBaseMorphism (..)
     ) where
 
+import Control.Monad.STM (STM)
+import Control.Monad.ST (ST)
+import Data.Functor.Identity (Identity)
 import Control.Monad (liftM, ap)
 import Control.Monad.Trans.Control
 import Control.Monad.Trans.Class (lift)
@@ -62,6 +65,25 @@ class MonadBaseControl b m => MonadBaseMorphism b m | m -> b where
         UnliftBase f <- lift askUnliftBase
         Unlift g <- askUnlift
         return $ UnliftBase (f . g)
+    {-# INLINE askUnliftBase #-}
+
+instance MonadBaseMorphism IO IO where
+    askUnliftBase = return (UnliftBase id)
+    {-# INLINE askUnliftBase #-}
+instance MonadBaseMorphism STM STM where
+    askUnliftBase = return (UnliftBase id)
+    {-# INLINE askUnliftBase #-}
+instance MonadBaseMorphism Identity Identity where
+    askUnliftBase = return (UnliftBase id)
+    {-# INLINE askUnliftBase #-}
+instance MonadBaseMorphism Maybe Maybe where
+    askUnliftBase = return (UnliftBase id)
+    {-# INLINE askUnliftBase #-}
+instance MonadBaseMorphism (Either e) (Either e) where
+    askUnliftBase = return (UnliftBase id)
+    {-# INLINE askUnliftBase #-}
+instance MonadBaseMorphism (ST s) (ST s) where
+    askUnliftBase = return (UnliftBase id)
     {-# INLINE askUnliftBase #-}
 
 instance MonadBaseMorphism b m => MonadBaseMorphism b (IdentityT m)
