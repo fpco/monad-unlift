@@ -111,8 +111,8 @@ instance MonadTransControl (StateRefT ref s) where
     {-# INLINABLE liftWith #-}
     {-# INLINABLE restoreT #-}
 instance MonadTransMorphism (StateRefT ref s) where
-    askRun = StateRefT $ return . flip unStateRefT
-    {-# INLINE askRun #-}
+    askUnlift = StateRefT $ \ref -> return $ Unlift (`unStateRefT` ref)
+    {-# INLINE askUnlift #-}
 
 instance MonadBaseControl b m => MonadBaseControl b (StateRefT ref s m) where
     type StM (StateRefT ref s m) a = StM m a

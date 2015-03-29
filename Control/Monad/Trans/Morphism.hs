@@ -7,6 +7,10 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Monad.Trans.Morphism
     ( MonadTransMorphism (..)
+    , Unlift (..)
+    , askRun
+    , UnliftBase (..)
+    , askRunBase
     , MonadBaseMorphism (..)
     ) where
 
@@ -19,32 +23,48 @@ import Control.Monad.Trans.Identity (IdentityT (..))
 import Yesod.Core.Types (HandlerT (..))
 import Control.Monad.Trans.Resource.Internal (ResourceT (..))
 
+newtype Unlift t = Unlift { unlift :: forall a n. Monad n => t n a -> n a }
+
 class MonadTransControl t => MonadTransMorphism t where
-    askRun :: Monad m => t m (t m a -> m a)
+    askUnlift :: Monad m => t m (Unlift t)
+
+askRun :: (MonadTransMorphism t, Monad (t m), Monad m) => t m (t m a -> m a)
+askRun = liftM unlift askUnlift
+{-# INLINE askRun #-}
 
 instance MonadTransMorphism IdentityT where
-    askRun = return runIdentityT
-    {-# INLINE askRun #-}
+    askUnlift = return (Unlift runIdentityT)
+    {-# INLINE askUnlift #-}
 instance MonadTransMorphism (ReaderT env) where
-    askRun = ReaderT $ return . flip runReaderT
-    {-# INLINE askRun #-}
+    askUnlift = ReaderT $ \env -> return $ Unlift (`runReaderT` env)
+    {-# INLINE askUnlift #-}
 instance MonadTransMorphism LoggingT where
-    askRun = LoggingT $ return . flip runLoggingT
-    {-# INLINE askRun #-}
+    askUnlift = LoggingT $ \f -> return $ Unlift (`runLoggingT` f)
+    {-# INLINE askUnlift #-}
 instance MonadTransMorphism NoLoggingT where
-    askRun = return runNoLoggingT
-    {-# INLINE askRun #-}
+    askUnlift = return (Unlift runNoLoggingT)
+    {-# INLINE askUnlift #-}
 instance MonadTransMorphism ResourceT where
-    askRun = ResourceT $ return . flip unResourceT
-    {-# INLINE askRun #-}
+    askUnlift = ResourceT $ \is -> return $ Unlift (`unResourceT` is)
+    {-# INLINE askUnlift #-}
+
+newtype UnliftBase b m = UnliftBase { unliftBase :: forall a. m a -> b a }
+
+askRunBase :: (MonadBaseMorphism b m)
+           => m (m a -> b a)
+askRunBase = liftM unliftBase askUnliftBase
+{-# INLINE askRunBase #-}
 
 class MonadBaseControl b m => MonadBaseMorphism b m | m -> b where
-    askRunBase :: m (m a -> b a)
-    default askRunBase
+    askUnliftBase :: m (UnliftBase b m)
+    default askUnliftBase
         :: (MonadBaseMorphism b m, MonadTransMorphism t, Monad (t m))
-        => t m (t m a -> b a)
-    askRunBase = (.) `liftM` lift askRunBase `ap` askRun
-    {-# INLINE askRunBase #-}
+        => t m (UnliftBase b (t m))
+    askUnliftBase = do
+        UnliftBase f <- lift askUnliftBase
+        Unlift g <- askUnlift
+        return $ UnliftBase (f . g)
+    {-# INLINE askUnliftBase #-}
 
 instance MonadBaseMorphism b m => MonadBaseMorphism b (IdentityT m)
 instance MonadBaseMorphism b m => MonadBaseMorphism b (ReaderT env m)
@@ -53,6 +73,7 @@ instance MonadBaseMorphism b m => MonadBaseMorphism b (NoLoggingT m)
 instance MonadBaseMorphism b m => MonadBaseMorphism b (ResourceT m)
 
 instance MonadBaseMorphism b m => MonadBaseMorphism b (HandlerT site m) where
-    askRunBase = HandlerT $ \env ->
-        (. (`unHandlerT` env)) `liftM` askRunBase
-    {-# INLINE askRunBase #-}
+    askUnliftBase = HandlerT $ \env -> do
+        UnliftBase f <- askUnliftBase
+        return $ UnliftBase (f . (`unHandlerT` env))
+    {-# INLINE askUnliftBase #-}
