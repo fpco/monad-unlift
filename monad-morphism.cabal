@@ -25,4 +25,5 @@ library
                      , transformers-base
                      , mutable-containers >= 0.3 && < 0.4
                      , exceptions >= 0.6
+                     , resourcet >= 1.1
   default-language:    Haskell2010
