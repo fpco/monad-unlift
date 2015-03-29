@@ -9,6 +9,7 @@ module Control.Monad.Trans.State.Ref
     , runStateRefT
     , runStateIORefT
     , runStateSTRefT
+    , module Control.Monad.State.Class
     ) where
 
 import Control.Monad.Trans.Morphism
