@@ -16,6 +16,7 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Control.Monad.Trans.Morphism
                        Control.Monad.Trans.State.Ref
+                       Control.Monad.Trans.Writer.Ref
   build-depends:       base >= 4.6 && < 5
                      , monad-control >= 1.0 && < 1.1
                      , transformers

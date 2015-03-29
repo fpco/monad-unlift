@@ -1,9 +1,9 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DeriveFunctor         #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE UndecidableInstances  #-}
 -- | An implementation of @StateT@ built on top of mutable references,
 -- providing a proper monad morphism.
 module Control.Monad.Trans.State.Ref
@@ -14,16 +14,18 @@ module Control.Monad.Trans.State.Ref
     , module Control.Monad.State.Class
     ) where
 
-import Control.Monad.Trans.Morphism
-import Control.Monad.Trans.Control
-import Control.Monad.State.Class
-import Control.Monad.Trans.Class
-import Control.Monad.IO.Class
-import Control.Monad.Base
-import Control.Monad
-import Control.Applicative
-import Data.Mutable
-import Control.Monad.Catch
+import           Control.Applicative          (Applicative (..))
+import           Control.Monad.Catch          (MonadCatch (..), MonadMask (..),
+                                               MonadThrow (..))
+import           Control.Monad.IO.Class       (MonadIO (..))
+import           Control.Monad.State.Class
+import           Control.Monad.Trans.Control  (defaultLiftBaseWith,
+                                               defaultRestoreM)
+import           Control.Monad.Trans.Morphism
+import           Data.Mutable                 (IORef, MCState, MutableRef,
+                                               PrimMonad, PrimState, RealWorld,
+                                               RefElement, STRef, newRef,
+                                               readRef, writeRef)
 
 -- |
 --
@@ -106,7 +108,7 @@ instance ( MCState (ref s) ~ PrimState b
   => MonadState s (StateRefT ref s m) where
     get = StateRefT $ liftBase . readRef
     {-# INLINE get #-}
-    put x = StateRefT $ liftBase . (`writeRef` x)
+    put x = seq x $ StateRefT $ liftBase . (`writeRef` x)
     {-# INLINE put #-}
 
 instance MonadTrans (StateRefT ref s) where
