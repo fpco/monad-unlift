@@ -1,8 +1,8 @@
-name:                monad-morphism
+name:                monad-unlift
 version:             0.1.0.0
-synopsis:            Typeclasses for representing monad (transformer) morphisms
+synopsis:            Typeclasses for representing monad transformer unlifting
 description:         See README.md
-homepage:            https://github.com/fpco/monad-morphism
+homepage:            https://github.com/fpco/monad-unlift
 license:             MIT
 license-file:        LICENSE
 author:              Michael Snoyman
@@ -14,7 +14,7 @@ extra-source-files:  README.md ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Control.Monad.Trans.Morphism
+  exposed-modules:     Control.Monad.Trans.Unlift
                        Control.Monad.Trans.State.Ref
                        Control.Monad.Trans.Writer.Ref
                        Control.Monad.Trans.RWS.Ref

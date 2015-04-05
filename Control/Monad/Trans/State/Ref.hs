@@ -14,18 +14,18 @@ module Control.Monad.Trans.State.Ref
     , module Control.Monad.State.Class
     ) where
 
-import           Control.Applicative          (Applicative (..))
-import           Control.Monad.Catch          (MonadCatch (..), MonadMask (..),
-                                               MonadThrow (..))
-import           Control.Monad.IO.Class       (MonadIO (..))
+import           Control.Applicative         (Applicative (..))
+import           Control.Monad.Catch         (MonadCatch (..), MonadMask (..),
+                                              MonadThrow (..))
+import           Control.Monad.IO.Class      (MonadIO (..))
 import           Control.Monad.State.Class
-import           Control.Monad.Trans.Control  (defaultLiftBaseWith,
-                                               defaultRestoreM)
-import           Control.Monad.Trans.Morphism
-import           Data.Mutable                 (IORef, MCState, MutableRef,
-                                               PrimMonad, PrimState, RealWorld,
-                                               RefElement, STRef, newRef,
-                                               readRef, writeRef)
+import           Control.Monad.Trans.Control (defaultLiftBaseWith,
+                                              defaultRestoreM)
+import           Control.Monad.Trans.Unlift
+import           Data.Mutable                (IORef, MCState, MutableRef,
+                                              PrimMonad, PrimState, RealWorld,
+                                              RefElement, STRef, newRef,
+                                              readRef, writeRef)
 
 -- |
 --

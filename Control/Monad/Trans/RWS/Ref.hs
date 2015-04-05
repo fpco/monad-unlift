@@ -19,20 +19,20 @@ module Control.Monad.Trans.RWS.Ref
     , module Control.Monad.RWS.Class
     ) where
 
-import           Control.Applicative          (Applicative (..))
-import           Control.Monad                (ap, liftM)
-import           Control.Monad.Catch          (MonadCatch (..), MonadMask (..),
-                                               MonadThrow (..))
-import           Control.Monad.IO.Class       (MonadIO (..))
+import           Control.Applicative         (Applicative (..))
+import           Control.Monad               (ap, liftM)
+import           Control.Monad.Catch         (MonadCatch (..), MonadMask (..),
+                                              MonadThrow (..))
+import           Control.Monad.IO.Class      (MonadIO (..))
 import           Control.Monad.RWS.Class
-import           Control.Monad.Trans.Control  (defaultLiftBaseWith,
-                                               defaultRestoreM)
-import           Control.Monad.Trans.Morphism
-import           Data.Monoid                  (Monoid, mappend, mempty)
-import           Data.Mutable                 (IORef, MCState, MutableRef,
-                                               PrimMonad, PrimState, RealWorld,
-                                               RefElement, STRef, modifyRef',
-                                               newRef, readRef, writeRef)
+import           Control.Monad.Trans.Control (defaultLiftBaseWith,
+                                              defaultRestoreM)
+import           Control.Monad.Trans.Unlift
+import           Data.Monoid                 (Monoid, mappend, mempty)
+import           Data.Mutable                (IORef, MCState, MutableRef,
+                                              PrimMonad, PrimState, RealWorld,
+                                              RefElement, STRef, modifyRef',
+                                              newRef, readRef, writeRef)
 
 -- |
 --

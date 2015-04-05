@@ -1,4 +1,4 @@
-## monad-morphism
+## monad-unlift
 
 A common pattern is to have some kind of a monad transformer, and want to pass
 an action into a function that requires actions in a base monad. That sounds a
@@ -54,10 +54,10 @@ transformer stacks that are isomorphic to `ReaderT`. For these monads, there is
 not context in the returned value. Therefore, there's no need to combine
 returned states or deal with possibly missing values.
 
-This concept is represented by the monad-morphism package, which provides a pair of typeclasses for these kinds of transformer stacks. Before we dive in, let's see how we solve our `concurrentlyG` problem with it:
+This concept is represented by the monad-unlift package, which provides a pair of typeclasses for these kinds of transformer stacks. Before we dive in, let's see how we solve our `concurrentlyG` problem with it:
 
 ```haskell
-concurrentlyG :: MonadBaseMorphism IO m
+concurrentlyG :: MonadBaseUnlift IO m
               => m a -> m b -> m (a, b)
 concurrentlyG f g = do
     UnliftBase run <- askUnliftBase
@@ -67,9 +67,9 @@ concurrentlyG f g = do
 Notice how we get `(a, b)` in the return type as desired. There's no need to
 unwrap values are deal with context.
 
-### MonadTransMorphism
+### MonadTransUnlift
 
-`MonadTransMorphism` is a class for any monad transformer which is isomorphic
+`MonadTransUnlift` is a class for any monad transformer which is isomorphic
 to `ReaderT`, in the sense that the environment can be captured and applied
 later. Some interesting cases in this space are:
 
@@ -103,15 +103,15 @@ or equivalently:
     liftIO $ void $ forkIO $ unlift u bar
 ```
 
-### MonadBaseMorphism
+### MonadBaseUnlift
 
-`MonadBaseMorphism` extends this concept to entire transformer stacks. This is
+`MonadBaseUnlift` extends this concept to entire transformer stacks. This is
 typically the typeclass that people end up using. You can think of these two
 typeclasses in exactly the same way as `MonadTrans` and `MonadIO`, or more
 precisely `MonadTrans` and `MonadBase`.
 
 For the same ImpredicativeTypes reason, there's a helper type `UnliftBase`.
-Everything we just discussed should transfer directly to `MonadBaseMorphism`,
+Everything we just discussed should transfer directly to `MonadBaseUnlift`,
 so learning something new isn't necessary. For example, you can rewrite the
 last snippet as:
 
