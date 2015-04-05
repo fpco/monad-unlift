@@ -146,9 +146,6 @@ instance MonadTransControl (WriterRefT ref w) where
     restoreT = WriterRefT . const
     {-# INLINABLE liftWith #-}
     {-# INLINABLE restoreT #-}
-instance MonadTransMorphism (WriterRefT ref w) where
-    askUnlift = WriterRefT $ \ref -> return $ Unlift (`unWriterRefT` ref)
-    {-# INLINE askUnlift #-}
 
 instance MonadBaseControl b m => MonadBaseControl b (WriterRefT ref w m) where
     type StM (WriterRefT ref w m) a = StM m a
@@ -156,7 +153,6 @@ instance MonadBaseControl b m => MonadBaseControl b (WriterRefT ref w m) where
     restoreM = defaultRestoreM
     {-# INLINE liftBaseWith #-}
     {-# INLINE restoreM #-}
-instance MonadBaseMorphism b m => MonadBaseMorphism b (WriterRefT ref w m)
 
 instance MonadThrow m => MonadThrow (WriterRefT ref w m) where
     throwM = lift . throwM

@@ -1,18 +1,20 @@
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances   #-}
+{-# LANGUAGE MultiParamTypeClasses, RankNTypes, ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies, TypeOperators                            #-}
+{-# LANGUAGE UndecidableInstances                                   #-}
+{-# LANGUAGE FunctionalDependencies                                 #-}
 -- | See overview in the README.md
 module Control.Monad.Trans.Morphism
     ( -- * Trans
-      MonadTransMorphism (..)
+      MonadTransMorphism
     , Unlift (..)
+    , askUnlift
     , askRun
       -- * Base
+    , MonadBaseMorphism
     , UnliftBase (..)
+    , askUnliftBase
     , askRunBase
-    , MonadBaseMorphism (..)
       -- * Reexports
     , MonadTrans (..)
     , MonadBase (..)
@@ -33,6 +35,11 @@ import Control.Monad.Trans.Identity (IdentityT (..))
 import Yesod.Core.Types (HandlerT (..))
 import Control.Monad.Trans.Resource.Internal (ResourceT (..))
 
+import Control.Monad.Trans.Control (MonadTransControl (liftWith), StT)
+import Control.Monad.Trans.Reader  (ReaderT)
+import Data.Constraint             ((:-), (\\))
+import Data.Constraint.Forall      (Forall, inst)
+
 -- | A function which can move an action down the monad transformer stack, by
 -- providing any necessary environment to the action.
 --
@@ -42,14 +49,27 @@ import Control.Monad.Trans.Resource.Internal (ResourceT (..))
 -- Since 0.1.0
 newtype Unlift t = Unlift { unlift :: forall a n. Monad n => t n a -> n a }
 
+class    (StT t a ~ a) => Identical t a
+instance (StT t a ~ a) => Identical t a
+
 -- | A monad transformer which behaves the monad morphism laws.
 --
 -- Since 0.1.0
-class MonadTransControl t => MonadTransMorphism t where
-    -- | Get the 'Unlift' action for the current transformer layer.
-    --
-    -- Since 0.1.0
-    askUnlift :: Monad m => t m (Unlift t)
+class    (MonadTransControl t, Forall (Identical t)) => MonadTransMorphism t
+instance (MonadTransControl t, Forall (Identical t)) => MonadTransMorphism t
+
+mkUnlift :: forall t m a . (Forall (Identical t), Monad m)
+         => (forall n b. Monad n => t n b -> n (StT t b)) -> t m a -> m a
+mkUnlift r act = r act \\ (inst :: Forall (Identical t) :- Identical t a)
+
+-- | Get the 'Unlift' action for the current transformer layer.
+--
+-- Since 0.1.0
+askUnlift :: forall t m. (MonadTransMorphism t, Monad m) => t m (Unlift t)
+askUnlift = liftWith unlifter
+  where
+    unlifter :: (forall n b. Monad n => t n b -> n (StT t b)) -> m (Unlift t)
+    unlifter r = return $ Unlift (mkUnlift r)
 
 -- | A simplified version of 'askUnlift' which addresses the common case where
 -- polymorphism isn't necessary.
@@ -59,47 +79,33 @@ askRun :: (MonadTransMorphism t, Monad (t m), Monad m) => t m (t m a -> m a)
 askRun = liftM unlift askUnlift
 {-# INLINE askRun #-}
 
-instance MonadTransMorphism IdentityT where
-    askUnlift = return (Unlift runIdentityT)
-    {-# INLINE askUnlift #-}
-instance MonadTransMorphism (ReaderT env) where
-    askUnlift = ReaderT $ \env -> return $ Unlift (`runReaderT` env)
-    {-# INLINE askUnlift #-}
-instance MonadTransMorphism LoggingT where
-    askUnlift = LoggingT $ \f -> return $ Unlift (`runLoggingT` f)
-    {-# INLINE askUnlift #-}
-instance MonadTransMorphism NoLoggingT where
-    askUnlift = return (Unlift runNoLoggingT)
-    {-# INLINE askUnlift #-}
--- | Note that using this instance is slightly dangerous, in the same way that
--- accessing the @InternalState@ is dangerous in general. Only do so if you
--- know the @runResourceT@ block has not completed.
-instance MonadTransMorphism ResourceT where
-    askUnlift = ResourceT $ \is -> return $ Unlift (`unResourceT` is)
-    {-# INLINE askUnlift #-}
-
 -- | Similar to 'Unlift', but instead of moving one layer down the stack, moves
 -- the action to the base monad.
 --
 -- Since 0.1.0
 newtype UnliftBase b m = UnliftBase { unliftBase :: forall a. m a -> b a }
 
+class    (StM m a ~ a) => IdenticalBase m a
+instance (StM m a ~ a) => IdenticalBase m a
+
 -- | A monad transformer stack which behaves the monad morphism laws.
 --
 -- Since 0.1.0
-class MonadBaseControl b m => MonadBaseMorphism b m | m -> b where
-    -- | Get the 'UnliftBase' action for the current transformer stack.
-    --
-    -- Since 0.1.0
-    askUnliftBase :: m (UnliftBase b m)
-    default askUnliftBase
-        :: (MonadBaseMorphism b m, MonadTransMorphism t, Monad (t m))
-        => t m (UnliftBase b (t m))
-    askUnliftBase = do
-        UnliftBase f <- lift askUnliftBase
-        Unlift g <- askUnlift
-        return $ UnliftBase (f . g)
-    {-# INLINE askUnliftBase #-}
+class (MonadBaseControl b m, Forall (IdenticalBase m)) => MonadBaseMorphism b m | m -> b
+instance (MonadBaseControl b m, Forall (IdenticalBase m)) => MonadBaseMorphism b m
+
+mkUnliftBase :: forall m a b. (Forall (IdenticalBase m), Monad b)
+             => (forall c. m c -> b (StM m c)) -> m a -> b a
+mkUnliftBase r act = r act \\ (inst :: Forall (IdenticalBase m) :- IdenticalBase m a)
+
+-- | Get the 'UnliftBase' action for the current transformer stack.
+--
+-- Since 0.1.0
+askUnliftBase :: forall b m. (MonadBaseMorphism b m) => m (UnliftBase b m)
+askUnliftBase = liftBaseWith unlifter
+  where
+    unlifter :: (forall c. m c -> b (StM m c)) -> b (UnliftBase b m)
+    unlifter r = return $ UnliftBase (mkUnliftBase r)
 
 -- | A simplified version of 'askUnliftBase' which addresses the common case
 -- where polymorphism isn't necessary.
@@ -109,35 +115,3 @@ askRunBase :: (MonadBaseMorphism b m)
            => m (m a -> b a)
 askRunBase = liftM unliftBase askUnliftBase
 {-# INLINE askRunBase #-}
-
-instance MonadBaseMorphism IO IO where
-    askUnliftBase = return (UnliftBase id)
-    {-# INLINE askUnliftBase #-}
-instance MonadBaseMorphism STM STM where
-    askUnliftBase = return (UnliftBase id)
-    {-# INLINE askUnliftBase #-}
-instance MonadBaseMorphism Identity Identity where
-    askUnliftBase = return (UnliftBase id)
-    {-# INLINE askUnliftBase #-}
-instance MonadBaseMorphism Maybe Maybe where
-    askUnliftBase = return (UnliftBase id)
-    {-# INLINE askUnliftBase #-}
-instance MonadBaseMorphism (Either e) (Either e) where
-    askUnliftBase = return (UnliftBase id)
-    {-# INLINE askUnliftBase #-}
-instance MonadBaseMorphism (ST s) (ST s) where
-    askUnliftBase = return (UnliftBase id)
-    {-# INLINE askUnliftBase #-}
-
-instance MonadBaseMorphism b m => MonadBaseMorphism b (IdentityT m)
-instance MonadBaseMorphism b m => MonadBaseMorphism b (ReaderT env m)
-instance MonadBaseMorphism b m => MonadBaseMorphism b (LoggingT m)
-instance MonadBaseMorphism b m => MonadBaseMorphism b (NoLoggingT m)
--- | Same warnings as the 'MonadTransMorphism' class apply.
-instance MonadBaseMorphism b m => MonadBaseMorphism b (ResourceT m)
-
-instance MonadBaseMorphism b m => MonadBaseMorphism b (HandlerT site m) where
-    askUnliftBase = HandlerT $ \env -> do
-        UnliftBase f <- askUnliftBase
-        return $ UnliftBase (f . (`unHandlerT` env))
-    {-# INLINE askUnliftBase #-}

@@ -185,9 +185,6 @@ instance MonadTransControl (RWSRefT refw refs r w s) where
     restoreT f = RWSRefT $ \_ _ _ -> f
     {-# INLINABLE liftWith #-}
     {-# INLINABLE restoreT #-}
-instance MonadTransMorphism (RWSRefT refw refs r w s) where
-    askUnlift = RWSRefT $ \r w s -> return $ Unlift (\m -> unRWSRefT m r w s)
-    {-# INLINE askUnlift #-}
 
 instance MonadBaseControl b m => MonadBaseControl b (RWSRefT refw refs r w s m) where
     type StM (RWSRefT refw refs r w s m) a = StM m a
@@ -195,7 +192,6 @@ instance MonadBaseControl b m => MonadBaseControl b (RWSRefT refw refs r w s m) 
     restoreM = defaultRestoreM
     {-# INLINE liftBaseWith #-}
     {-# INLINE restoreM #-}
-instance MonadBaseMorphism b m => MonadBaseMorphism b (RWSRefT refw refs r w s m)
 
 instance MonadThrow m => MonadThrow (RWSRefT refw refs r w s m) where
     throwM = lift . throwM

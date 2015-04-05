@@ -29,4 +29,5 @@ library
                      , exceptions >= 0.6
                      , resourcet >= 1.1
                      , stm
+                     , constraints
   default-language:    Haskell2010

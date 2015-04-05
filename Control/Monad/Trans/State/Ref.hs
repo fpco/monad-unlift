@@ -127,9 +127,6 @@ instance MonadTransControl (StateRefT ref s) where
     restoreT = StateRefT . const
     {-# INLINABLE liftWith #-}
     {-# INLINABLE restoreT #-}
-instance MonadTransMorphism (StateRefT ref s) where
-    askUnlift = StateRefT $ \ref -> return $ Unlift (`unStateRefT` ref)
-    {-# INLINE askUnlift #-}
 
 instance MonadBaseControl b m => MonadBaseControl b (StateRefT ref s m) where
     type StM (StateRefT ref s m) a = StM m a
@@ -137,7 +134,6 @@ instance MonadBaseControl b m => MonadBaseControl b (StateRefT ref s m) where
     restoreM = defaultRestoreM
     {-# INLINE liftBaseWith #-}
     {-# INLINE restoreM #-}
-instance MonadBaseMorphism b m => MonadBaseMorphism b (StateRefT ref s m)
 
 instance MonadThrow m => MonadThrow (StateRefT ref s m) where
     throwM = lift . throwM
