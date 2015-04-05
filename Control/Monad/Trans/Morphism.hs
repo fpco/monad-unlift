@@ -1,8 +1,13 @@
-{-# LANGUAGE ConstraintKinds, FlexibleContexts, FlexibleInstances   #-}
-{-# LANGUAGE MultiParamTypeClasses, RankNTypes, ScopedTypeVariables #-}
-{-# LANGUAGE TypeFamilies, TypeOperators                            #-}
-{-# LANGUAGE UndecidableInstances                                   #-}
-{-# LANGUAGE FunctionalDependencies                                 #-}
+{-# LANGUAGE ConstraintKinds        #-}
+{-# LANGUAGE FlexibleContexts       #-}
+{-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
+{-# LANGUAGE RankNTypes             #-}
+{-# LANGUAGE ScopedTypeVariables    #-}
+{-# LANGUAGE TypeFamilies           #-}
+{-# LANGUAGE TypeOperators          #-}
+{-# LANGUAGE UndecidableInstances   #-}
 -- | See overview in the README.md
 module Control.Monad.Trans.Morphism
     ( -- * Trans
@@ -22,18 +27,17 @@ module Control.Monad.Trans.Morphism
     , MonadBaseControl (..)
     ) where
 
-import Control.Monad.STM (STM)
-import Control.Monad.ST (ST)
-import Data.Functor.Identity (Identity)
-import Control.Monad (liftM, ap)
-import Control.Monad.Trans.Control (MonadTransControl (..), MonadBaseControl (..))
-import Control.Monad.Base (MonadBase (..))
-import Control.Monad.Trans.Class (MonadTrans (..))
-
-import Control.Monad.Trans.Control (MonadTransControl (liftWith), StT)
-import Control.Monad.Trans.Reader  (ReaderT)
-import Data.Constraint             ((:-), (\\))
-import Data.Constraint.Forall      (Forall, inst)
+import           Control.Monad               (ap, liftM)
+import           Control.Monad.Base          (MonadBase (..))
+import           Control.Monad.ST            (ST)
+import           Control.Monad.STM           (STM)
+import           Control.Monad.Trans.Class   (MonadTrans (..))
+import           Control.Monad.Trans.Control (MonadBaseControl (..),
+                                              MonadTransControl (..))
+import           Control.Monad.Trans.Reader  (ReaderT)
+import           Data.Constraint             ((:-), (\\))
+import           Data.Constraint.Forall      (Forall, inst)
+import           Data.Functor.Identity       (Identity)
 
 -- | A function which can move an action down the monad transformer stack, by
 -- providing any necessary environment to the action.
