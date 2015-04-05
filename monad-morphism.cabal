@@ -21,13 +21,10 @@ library
   build-depends:       base >= 4.6 && < 5
                      , monad-control >= 1.0 && < 1.1
                      , transformers
-                     , monad-logger >=0.3 && < 0.4
-                     , yesod-core >= 1.4 && < 1.5
                      , mtl
                      , transformers-base
                      , mutable-containers >= 0.3 && < 0.4
                      , exceptions >= 0.6
-                     , resourcet >= 1.1
                      , stm
                      , constraints
   default-language:    Haskell2010
