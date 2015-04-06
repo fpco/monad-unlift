@@ -65,7 +65,7 @@ concurrentlyG f g = do
 ```
 
 Notice how we get `(a, b)` in the return type as desired. There's no need to
-unwrap values are deal with context.
+unwrap values or deal with context.
 
 ### MonadTransUnlift
 
@@ -74,7 +74,7 @@ to `ReaderT`, in the sense that the environment can be captured and applied
 later. Some interesting cases in this space are:
 
 * `IdentityT` and things isomorphic to it; in this case, you can think of the environment as being `()`
-* Transformers which contain a mutable reference in their environment. This allows them to behave like stateful transformers (e.g., `StateT` or `WriterT`), but still behave the monad morphism laws. (See below for more details.)
+* Transformers which contain a mutable reference in their environment. This allows them to behave like stateful transformers (e.g., `StateT` or `WriterT`), but still obey the monad morphism laws. (See below for more details.)
 
 Due to weaknesses in GHC's ImpredicativeTypes, we have a helper datatype to
 allow for getting polymorphic unlift functions, appropriately named `Unlift`.
