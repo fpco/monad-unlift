@@ -1,5 +1,8 @@
 ## monad-unlift
 
+Typeclasses for providing for unlifting of monad transformers and stacks, and
+concrete implementations of common transformers implementing this type classes.
+
 ## Synopsis
 
 ```haskell
