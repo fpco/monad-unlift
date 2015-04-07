@@ -6,6 +6,10 @@
 {-# LANGUAGE UndecidableInstances  #-}
 -- | An implementation of @StateT@ built on top of mutable references,
 -- providing a proper monad morphism.
+--
+-- Please see the documentation at
+-- <https://www.stackage.org/package/monad-unlift> for more details on using
+-- this module.
 module Control.Monad.Trans.State.Ref
     ( StateRefT
     , runStateRefT

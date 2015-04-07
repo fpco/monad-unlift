@@ -1,5 +1,68 @@
 ## monad-unlift
 
+## Synopsis
+
+```haskell
+import Control.Concurrent.Async
+import Control.Monad.Trans.Unlift
+import Control.Monad.Trans.RWS.Ref
+import Control.Monad.IO.Class
+import Data.Mutable
+
+-- Some artbirary data type for the MonadReader
+data SomeEnv = SomeEnv Int
+
+myFunc :: RWSRefT
+    -- The WriterT piece is contained by an IORef
+    IORef
+    -- For efficiency, we store the state in a primitive
+    -- reference for efficiency
+    (PRef RealWorld)
+    SomeEnv   -- Reader
+    [String]  -- Writer
+    Int       -- State
+    IO
+    (String, String)
+myFunc = do
+    -- Get the unlift function. Due to weaknesses in ImpredicativeTypes, we
+    -- need to use a newtype wrapper. You can also use askRunBase.
+    --
+    -- If you want to just unwrap one transformer layer, use
+    -- askUnlift/askRun/Unlift.
+    UnliftBase run <- askUnliftBase
+
+    -- Note that we can use unlift to turn our transformer actions into IO
+    -- actions. Unlike the standard RWST, actions from separate threads are
+    -- both retained due to mutable references.
+    --
+    -- In real life: you shouldn't rely on this working, as RWST is not thread
+    -- safe. This example is provided as a good demonstration of the type level
+    -- functionality.
+    liftIO $ concurrently (run foo) (run bar)
+  where
+    foo = do
+        tell ["starting foo"]
+        modify (+ 1)
+        tell ["leaving foo"]
+        return "foo is done"
+    bar = do
+        tell ["starting bar"]
+        SomeEnv e <- ask
+        modify (+ e)
+        tell ["leaving bar"]
+        return "bar is done"
+
+main :: IO ()
+main = do
+    ((w, x), y, z) <- runRWSRefT myFunc (SomeEnv 5) 6
+    print w -- foo is done
+    print x -- bar is done
+    print y -- 12 = 6 + 5 + 1
+    print z -- starting and leaving statements, order ambiguous
+```
+
+## Overview
+
 A common pattern is to have some kind of a monad transformer, and want to pass
 an action into a function that requires actions in a base monad. That sounds a
 bit abstract, so let's give a concrete example:
@@ -138,6 +201,15 @@ use mutable references. These reference are generic using the
 package, which allows you to have highly efficient references like `PRef`
 instead of always using boxed references like `IORef`.
 
+Note that, for generality, the reference transformers take type parameters
+indicating which mutable reference type to use. Some examples you may use are:
+
+* `IORef` for boxed references in `IO`
+* `STRef s` for boxed references in `ST`
+* `PRef RealWorld` for an unboxed reference in `IO`
+
+See the synopsis for a complete example.
+
 ### conduit
 
 The `transPipe` function in conduit has caused confusion in the past due to its
@@ -150,3 +222,22 @@ Both the `HandlerT` transformer from yesod-core and `LoggingT`/`NoLoggingT` are
 valid monad morphisms. `HandlerT` is in fact my first example of using the
 "enviornment holding a mutable reference" technique to overcome exceptions
 destroying state.
+
+```haskell
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
+import Control.Concurrent.Async
+import Control.Monad.IO.Class
+import Control.Monad.Logger
+import Control.Monad.Trans.Unlift
+
+main :: IO ()
+main = runStdoutLoggingT foo
+
+foo :: (MonadLogger m, MonadBaseUnlift IO m, MonadIO m) => m ()
+foo = do
+    run <- askRunBase
+    a <- liftIO $ async $ run $ $logDebug "Hello World!"
+    liftIO $ wait a
+```

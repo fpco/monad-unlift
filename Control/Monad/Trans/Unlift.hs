@@ -27,17 +27,13 @@ module Control.Monad.Trans.Unlift
     , MonadBaseControl (..)
     ) where
 
-import           Control.Monad               (ap, liftM)
+import           Control.Monad               (liftM)
 import           Control.Monad.Base          (MonadBase (..))
-import           Control.Monad.ST            (ST)
-import           Control.Monad.STM           (STM)
 import           Control.Monad.Trans.Class   (MonadTrans (..))
 import           Control.Monad.Trans.Control (MonadBaseControl (..),
                                               MonadTransControl (..))
-import           Control.Monad.Trans.Reader  (ReaderT)
 import           Data.Constraint             ((:-), (\\))
 import           Data.Constraint.Forall      (Forall, inst)
-import           Data.Functor.Identity       (Identity)
 
 -- | A function which can move an action down the monad transformer stack, by
 -- providing any necessary environment to the action.

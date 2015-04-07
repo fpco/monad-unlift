@@ -11,6 +11,10 @@
 -- transformers in the transformers package is that it does not have space
 -- leaks in the writer component. For more information, see
 -- <https://mail.haskell.org/pipermail/libraries/2012-October/018599.html>.
+--
+-- Please see the documentation at
+-- <https://www.stackage.org/package/monad-unlift> for more details on using
+-- this module.
 module Control.Monad.Trans.RWS.Ref
     ( RWSRefT
     , runRWSRefT
