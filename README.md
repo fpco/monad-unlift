@@ -18,8 +18,7 @@ data SomeEnv = SomeEnv Int
 myFunc :: RWSRefT
     -- The WriterT piece is contained by an IORef
     IORef
-    -- For efficiency, we store the state in a primitive
-    -- reference for efficiency
+    -- For efficiency, we store the state in a primitive reference
     (PRef RealWorld)
     SomeEnv   -- Reader
     [String]  -- Writer
@@ -199,7 +198,7 @@ is problematic since there's no built in support for operations like `get`,
 instance.
 
 To address this case, this package includes variants of those transformers that
-use mutable references. These reference are generic using the
+use mutable references. These references are generic using the
 [mutable-containers](http://www.stackage.org/package/mutable-containers)
 package, which allows you to have highly efficient references like `PRef`
 instead of always using boxed references like `IORef`.
@@ -223,7 +222,7 @@ makes a good companion to conduit to simplify that function's usage.
 
 Both the `HandlerT` transformer from yesod-core and `LoggingT`/`NoLoggingT` are
 valid monad morphisms. `HandlerT` is in fact my first example of using the
-"enviornment holding a mutable reference" technique to overcome exceptions
+"environment holding a mutable reference" technique to overcome exceptions
 destroying state.
 
 ```haskell
