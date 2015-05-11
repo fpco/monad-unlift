@@ -1,5 +1,5 @@
 name:                monad-unlift
-version:             0.1.0.1
+version:             0.1.1.0
 synopsis:            Typeclasses for representing monad transformer unlifting
 description:         See README.md
 homepage:            https://github.com/fpco/monad-unlift
@@ -27,4 +27,5 @@ library
                      , exceptions >= 0.6
                      , stm
                      , constraints
+                     , resourcet
   default-language:    Haskell2010

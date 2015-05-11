@@ -32,6 +32,7 @@ import           Control.Monad.RWS.Class
 import           Control.Monad.Trans.Control (defaultLiftBaseWith,
                                               defaultRestoreM)
 import           Control.Monad.Trans.Unlift
+import           Control.Monad.Trans.Resource (MonadResource (..))
 import           Data.Monoid                 (Monoid, mappend, mempty)
 import           Data.Mutable                (IORef, MCState, MutableRef,
                                               PrimMonad, PrimState, RealWorld,
@@ -214,3 +215,7 @@ instance MonadMask m => MonadMask (RWSRefT refw refs r w s m) where
       where q :: (m a -> m a) -> RWSRefT refw refs r w s m a -> RWSRefT refw refs r w s m a
             q u (RWSRefT b) = RWSRefT (\r w s -> u (b r w s))
   {-# INLINE uninterruptibleMask #-}
+
+instance MonadResource m => MonadResource (RWSRefT refw refs r w s m) where
+    liftResourceT = lift . liftResourceT
+    {-# INLINE liftResourceT #-}

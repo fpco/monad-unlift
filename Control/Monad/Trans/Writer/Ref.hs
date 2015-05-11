@@ -30,6 +30,7 @@ import           Control.Monad.IO.Class      (MonadIO (..))
 import           Control.Monad.Trans.Control (defaultLiftBaseWith,
                                               defaultRestoreM)
 import           Control.Monad.Trans.Unlift
+import           Control.Monad.Trans.Resource (MonadResource (..))
 import           Control.Monad.Writer.Class
 import           Data.Monoid                 (Monoid, mappend, mempty)
 import           Data.Mutable                (IORef, MCState, MutableRef,
@@ -174,3 +175,7 @@ instance MonadMask m => MonadMask (WriterRefT ref w m) where
       where q :: (m a -> m a) -> WriterRefT ref w m a -> WriterRefT ref w m a
             q u (WriterRefT b) = WriterRefT (u . b)
   {-# INLINE uninterruptibleMask #-}
+
+instance MonadResource m => MonadResource (WriterRefT ref w m) where
+    liftResourceT = lift . liftResourceT
+    {-# INLINE liftResourceT #-}

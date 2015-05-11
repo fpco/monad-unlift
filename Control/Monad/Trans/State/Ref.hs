@@ -26,6 +26,7 @@ import           Control.Monad.State.Class
 import           Control.Monad.Trans.Control (defaultLiftBaseWith,
                                               defaultRestoreM)
 import           Control.Monad.Trans.Unlift
+import           Control.Monad.Trans.Resource (MonadResource (..))
 import           Data.Mutable                (IORef, MCState, MutableRef,
                                               PrimMonad, PrimState, RealWorld,
                                               RefElement, STRef, newRef,
@@ -155,3 +156,7 @@ instance MonadMask m => MonadMask (StateRefT ref s m) where
       where q :: (m a -> m a) -> StateRefT ref s m a -> StateRefT ref s m a
             q u (StateRefT b) = StateRefT (u . b)
   {-# INLINE uninterruptibleMask #-}
+
+instance MonadResource m => MonadResource (StateRefT ref s m) where
+    liftResourceT = lift . liftResourceT
+    {-# INLINE liftResourceT #-}
