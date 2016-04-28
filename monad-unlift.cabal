@@ -29,3 +29,7 @@ library
                      , constraints
                      , resourcet
   default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/fpco/monad-unlift.git
