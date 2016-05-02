@@ -6,7 +6,8 @@ resolver: lts-5.14
 
 # Local packages, usually specified by relative directory name
 packages:
-- '.'
+- ./monad-unlift
+- ./monad-unlift-ref
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: []
 
