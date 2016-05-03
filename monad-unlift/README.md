@@ -2,8 +2,10 @@
 
 [![Build Status](https://travis-ci.org/fpco/monad-unlift.svg?branch=master)](https://travis-ci.org/fpco/monad-unlift)
 
-Typeclasses for providing for unlifting of monad transformers and stacks, and
-concrete implementations of common transformers implementing this type classes.
+Typeclasses for providing for unlifting of monad transformers and stacks.
+
+Note that concrete implementations of common transformers implementing
+these type classes are provided by the monad-unlift-ref package.
 
 ## Synopsis
 
