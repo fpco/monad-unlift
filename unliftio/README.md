@@ -112,6 +112,73 @@ This pops up in a number of places. Some examples:
 This also pops up when working with libraries which are monomorphic on
 `IO`, even if they could be written more extensibly.
 
+## Examples
+
+Reading through the codebase here is likely the best example to see
+how to use `MonadUnliftIO` in practice. And for many cases, you can
+simply add the `MonadUnliftIO` constraint and then use the
+pre-unlifted versions of functions (like
+`UnliftIO.Exception.catch`). But ultimately, you'll probably want to
+use the typeclass directly. Here are some simple examples. First: ome
+typeclass instances:
+
+```haskell
+instance MonadUnliftIO IO where
+  askUnliftIO = return (UnliftIO id)
+instance MonadUnliftIO m => MonadUnliftIO (IdentityT m) where
+  askUnliftIO = IdentityT $
+                withUnliftIO $ \u ->
+                return (UnliftIO (unliftIO u . runIdentityT))
+instance MonadUnliftIO m => MonadUnliftIO (ReaderT r m) where
+  askUnliftIO = ReaderT $ \r ->
+                withUnliftIO $ \u ->
+                return (UnliftIO (unliftIO u . flip runReaderT r))
+```
+
+Note that:
+
+* The `IO` instance does not actually do any lifting or unlifting, and
+  therefore it can use `id`
+* `IdentityT` is essentially just wrapping/unwrapping its data
+  constructor, and then recursively calling `withUnliftIO` on the
+  underlying monad.
+* `ReaderT` is just like `IdentityT`, but it captures the reader
+  environment when starting.
+
+Second, using `withRunInIO` to unlift a function:
+
+```haskell
+timeout :: MonadUnliftIO m => Int -> m a -> m (Maybe a)
+timeout x y = withRunInIO $ \run -> System.Timeout.timeout x $ run y
+```
+
+This is a common pattern: use `withRunInIO` to capture a run function,
+and then call the original function with the user-supplied arguments,
+applying `run` as necessary.
+
+Thirdly, using `askUnliftIO` directly when multiple types are needed:
+
+```haskell
+race :: MonadUnliftIO m => m a -> m b -> m (Either a b)
+race a b = withUnliftIO $ \u -> A.race (unliftIO u a) (unliftIO u b)
+```
+
+This works just like `withRunIO`, except we use `unliftIO u` instead
+of `run`, which is polymorphic. You _could_ get away with multiple
+`withRunInIO` calls here instead, but this approach is idiomatic and
+may be more performant (depending on optimizations).
+
+And finally, a much more complex usage, when unlifting the `mask`
+function. This function needs to unlift vaues to be passed into the
+`restore` function, and then `liftIO` the result of the `restore`
+function.
+
+```haskell
+mask :: MonadUnliftIO m => ((forall a. m a -> m a) -> m b) -> m b
+mask f = withUnliftIO $ \u -> Control.Exception.mask $ \unmask ->
+  unliftIO u $ f $ liftIO . unmask . unliftIO u
+```
+
 ## Limitations
 
 Not all monads which can be an instance of `MonadIO` can be instances
