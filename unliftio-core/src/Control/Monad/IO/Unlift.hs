@@ -34,6 +34,21 @@ newtype UnliftIO m = UnliftIO { unliftIO :: forall a. m a -> IO a }
 -- 'MonadUnliftIO' to 'ReaderT' and 'IdentityT' transformers on top of
 -- 'IO'.
 --
+-- Laws. For any value @u@ returned by 'askUnliftIO', it must meet the
+-- monad transformer laws as reformulated for @MonadUnliftIO@:
+--
+-- * @unliftIO u . return = return@
+--
+-- * @unliftIO u (m >>= f) = unliftIO u m >>= unliftIO u . f@
+--
+-- The third is a currently nameless law which ensures that the
+-- current context is preserved.
+--
+-- * @askUnliftIO >>= (\u -> liftIO (unliftIO u m)) = m@
+--
+-- If you have a name for this, please submit it in a pull request for
+-- great glory.
+--
 -- @since 0.1.0.0
 class MonadIO m => MonadUnliftIO m where
   -- | Capture the current monadic context, providing the ability to
