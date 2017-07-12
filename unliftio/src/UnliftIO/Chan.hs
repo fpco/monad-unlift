@@ -1,4 +1,6 @@
 -- | Lifted "Control.Concurrent.Chan"
+--
+-- @since 0.1.0.0
 module UnliftIO.Chan
   ( Chan
   , newChan
