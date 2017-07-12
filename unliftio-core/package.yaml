@@ -13,8 +13,8 @@ extra-source-files:
 - ChangeLog.md
 
 dependencies:
-  - base >= 4.7 && < 5
-  - transformers
+  - base >= 4.5 && < 4.11
+  - transformers >= 0.2 && < 0.6
 
 library:
   source-dirs:
