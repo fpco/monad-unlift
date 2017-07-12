@@ -16,10 +16,13 @@ dependencies:
   - base >= 4.7 && < 5
   - async > 2.1.1
   - deepseq
+  - directory
+  - filepath
   - monad-logger
   - resourcet
   - transformers
   - unliftio-core
+  - unix # FIXME make this a conditional dependency
 
 library:
   source-dirs:
