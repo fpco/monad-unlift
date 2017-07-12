@@ -13,6 +13,9 @@ module UnliftIO.Exception
   , StringException (..)
   , throwTo
   , impureThrow
+  , fromEither
+  , fromEitherIO
+  , fromEitherM
     -- * Catching (with recovery)
   , catch
   , catchIO
@@ -528,3 +531,22 @@ throwTo tid = liftIO . EUnsafe.throwTo tid . toAsyncException
 -- @since 0.1.0.0
 impureThrow :: Exception e => e -> a
 impureThrow = EUnsafe.throw . toSyncException
+
+-- | Unwrap an 'Either' value, throwing its 'Left' value as a runtime
+-- exception via 'throwIO' if present.
+--
+-- @since 0.1.0.0
+fromEither :: (Exception e, MonadIO m) => Either e a -> m a
+fromEither = either throwIO return
+
+-- | Same as 'fromEither', but works on an 'IO'-wrapped 'Either'.
+--
+-- @since 0.1.0.0
+fromEitherIO :: (Exception e, MonadIO m) => IO (Either e a) -> m a
+fromEitherIO = fromEitherM . liftIO
+
+-- | Same as 'fromEither', but works on an 'm'-wrapped 'Either'.
+--
+-- @since 0.1.0.0
+fromEitherM :: (Exception e, MonadIO m) => m (Either e a) -> m a
+fromEitherM = (>>= fromEither)
