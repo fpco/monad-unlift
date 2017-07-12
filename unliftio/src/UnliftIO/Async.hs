@@ -53,7 +53,10 @@ import qualified Control.Concurrent.Async as A
 import Control.Concurrent (threadDelay)
 import Control.Monad (forever, liftM)
 import Control.Monad.IO.Unlift
+
+#if MIN_VERSION_base(4,9,0)
 import Data.Semigroup
+#endif
 
 -- | Unlift 'A.async'
 --
