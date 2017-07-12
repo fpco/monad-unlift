@@ -1,3 +1,6 @@
 /dist/
 *.swp
 .stack-work/
+*~
+unliftio-core/unliftio-core.cabal
+unliftio/unliftio.cabal
