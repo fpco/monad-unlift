@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE RankNTypes #-}
--- | See "Control.Concurrent.Async"
+-- | Unlifted "Control.Concurrent.Async"
 --
 -- @since 0.1.0.0
 module UnliftIO.Async
