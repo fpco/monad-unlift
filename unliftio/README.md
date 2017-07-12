@@ -4,6 +4,19 @@ Provides the core `MonadUnliftIO` typeclass, a number of common
 instances, and a collection of common functions working with it.  Not
 sure what the `MonadUnliftIO` typeclass is all about? Read on!
 
+## Quickstart
+
+* Replace imports like `Control.Exception` with
+  `UnliftIO.Exception`. Yay, your `catch` and `finally` are more
+  powerful and safer!
+* Similar with `Control.Concurrent.Async` with `UnliftIO.Async`
+* Or go all in and import `UnliftIO`
+* Naming conflicts: let `unliftio` win
+* Drop the deps on `monad-control`, `lifted-base`, and `exceptions`
+* Compilation failures? You may have just avoided subtle runtime bugs
+
+Sound like magic? It's not. Keep reading!
+
 ## Unlifting in 2 minutes
 
 Let's say I have a function:
