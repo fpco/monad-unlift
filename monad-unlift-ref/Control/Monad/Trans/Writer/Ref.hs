@@ -27,6 +27,7 @@ import           Control.Applicative         (Applicative (..))
 import           Control.Monad.Catch         (MonadCatch (..), MonadMask (..),
                                               MonadThrow (..))
 import           Control.Monad.IO.Class      (MonadIO (..))
+import           Control.Monad.Reader.Class  (MonadReader (..))
 import           Control.Monad.Trans.Control (defaultLiftBaseWith,
                                               defaultRestoreM)
 import           Control.Monad.Trans.Unlift
@@ -134,6 +135,14 @@ instance ( MCState (ref w) ~ PrimState b
         liftBase $ modifyRef' ref g
         return a
     {-# INLINEABLE pass #-}
+
+instance MonadReader r m => MonadReader r (WriterRefT ref w m) where
+    ask = WriterRefT $ const ask
+    {-# INLINE ask #-}
+    local f m = WriterRefT $ local f . unWriterRefT m
+    {-# INLINE local #-}
+    reader = WriterRefT . const . reader
+    {-# INLINE reader #-}
 
 instance MonadTrans (WriterRefT ref w) where
     lift = WriterRefT . const
