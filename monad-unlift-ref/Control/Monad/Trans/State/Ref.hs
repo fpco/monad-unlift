@@ -117,6 +117,9 @@ instance ( MCState (ref s) ~ PrimState b
     put x = seq x $ StateRefT $ liftBase . (`writeRef` x)
     {-# INLINE put #-}
 
+-- |
+--
+-- Since 0.3.0
 instance MonadReader r m => MonadReader r (StateRefT ref s m) where
     ask = StateRefT $ const ask
     {-# INLINE ask #-}

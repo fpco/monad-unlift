@@ -136,6 +136,9 @@ instance ( MCState (ref w) ~ PrimState b
         return a
     {-# INLINEABLE pass #-}
 
+-- |
+--
+-- Since 0.3.0
 instance MonadReader r m => MonadReader r (WriterRefT ref w m) where
     ask = WriterRefT $ const ask
     {-# INLINE ask #-}

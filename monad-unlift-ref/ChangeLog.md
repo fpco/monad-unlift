@@ -1,3 +1,8 @@
+## 0.3.0
+
+* Add `MonadReader` instance for `StateRefT`
+* Add `MonadReader` instance for `WriterRefT`
+
 ## 0.2.0
 
 * Split out monad-unlift-ref
