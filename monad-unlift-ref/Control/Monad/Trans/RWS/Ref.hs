@@ -41,7 +41,7 @@ import           Data.Mutable                (IORef, MCState, MutableRef,
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 newtype RWSRefT refw refs r w s m a = RWSRefT
     { unRWSRefT :: r -> refw w -> refs s -> m a
     }
@@ -49,7 +49,7 @@ newtype RWSRefT refw refs r w s m a = RWSRefT
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runRWSRefT
     :: ( Monad m
        , w ~ RefElement (refw w)
@@ -75,7 +75,7 @@ runRWSRefT (RWSRefT f) r s0 = do
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runRWSIORefT
     :: ( Monad m
        , RealWorld ~ PrimState b
@@ -92,7 +92,7 @@ runRWSIORefT = runRWSRefT
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runRWSSTRefT
     :: ( Monad m
        , ps ~ PrimState b

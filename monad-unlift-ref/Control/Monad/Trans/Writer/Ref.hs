@@ -41,7 +41,7 @@ import           Data.Mutable                (IORef, MCState, MutableRef,
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 newtype WriterRefT ref w m a = WriterRefT
     { unWriterRefT :: ref w -> m a
     }
@@ -49,7 +49,7 @@ newtype WriterRefT ref w m a = WriterRefT
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runWriterRefT
     :: ( Monad m
        , w ~ RefElement (ref w)
@@ -70,7 +70,7 @@ runWriterRefT (WriterRefT f) = do
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runWriterIORefT
     :: ( Monad m
        , RealWorld ~ PrimState b
@@ -85,7 +85,7 @@ runWriterIORefT = runWriterRefT
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runWriterSTRefT
     :: ( Monad m
        , ps ~ PrimState b
@@ -138,7 +138,7 @@ instance ( MCState (ref w) ~ PrimState b
 
 -- |
 --
--- Since 0.3.0
+-- @since 0.2.1
 instance MonadReader r m => MonadReader r (WriterRefT ref w m) where
     ask = WriterRefT $ const ask
     {-# INLINE ask #-}

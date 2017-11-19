@@ -35,7 +35,7 @@ import           Data.Mutable                (IORef, MCState, MutableRef,
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 newtype StateRefT ref s m a = StateRefT
     { unStateRefT :: ref s -> m a
     }
@@ -43,7 +43,7 @@ newtype StateRefT ref s m a = StateRefT
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runStateRefT
     :: ( Monad m
        , s ~ RefElement (ref s)
@@ -64,7 +64,7 @@ runStateRefT (StateRefT f) v0 = do
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runStateIORefT
     :: ( Monad m
        , RealWorld ~ PrimState b
@@ -79,7 +79,7 @@ runStateIORefT = runStateRefT
 
 -- |
 --
--- Since 0.1.0
+-- @since 0.1.0
 runStateSTRefT
     :: ( Monad m
        , ps ~ PrimState b
@@ -119,7 +119,7 @@ instance ( MCState (ref s) ~ PrimState b
 
 -- |
 --
--- Since 0.3.0
+-- @since 0.2.1
 instance MonadReader r m => MonadReader r (StateRefT ref s m) where
     ask = StateRefT $ const ask
     {-# INLINE ask #-}
