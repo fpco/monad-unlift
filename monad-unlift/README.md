@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/fpco/monad-unlift.svg?branch=master)](https://travis-ci.org/fpco/monad-unlift)
 
+**DEPRECATED** Due to confusing error messages, I recommend using [unliftio](https://www.stackage.org/package/unliftio) instead.
+
 Typeclasses for providing for unlifting of monad transformers and stacks.
 
 Note that concrete implementations of common transformers implementing
